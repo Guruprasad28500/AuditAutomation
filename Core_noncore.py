@@ -142,7 +142,7 @@ def update_comments(sheet, comments_dict, valid_codes_dict, local_sheet,sob_data
     special_benefit_types = ['ANES', 'ASUR', 'CHRT', 'DXL ', 'EV  ', 'GAMB', 'HAEM', 'HOMV', 'HOSV',
                              'HS  ', 'ICU ', 'MISC', 'OV  ', 'RBO ', 'RX  ', 'SURG', 'SV  ',
                              'TOV ', 'IMRT', 'SURC', 'ICU ']
-    sob_internal_limit_row = sob_data[sob_data.iloc[:, 0].astype(str).str.contains("Overseas \(Non-Caribbean\)", case=False, na=False)]
+    sob_internal_limit_row = sob_data[sob_data.iloc[:, 0].astype(str).str.contains("Overseas \(Non-Caribbean|Non-Caricom\)", case=False, na=False)]
     sob_internal_limit = pd.to_numeric(sob_internal_limit_row.iloc[0, -1], errors='coerce')
     #print(sob_internal_limit)
 

@@ -80,7 +80,7 @@ def upload_file():
         # Add 'Comments' column to each DataFrame
         for df in [local_data, core_data, noncore_data]:
             if not df.empty:
-                df['Comments'] = ''  # Initialize with empty strings or any default value
+                df['Comments'] = ''  
 
         processed_filepath = os.path.join(app.config['PROCESSED_FOLDER'], 'processed_data.xlsx')
         with pd.ExcelWriter(processed_filepath) as writer:

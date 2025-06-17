@@ -31,28 +31,32 @@ def extract_stoploss_data(sob_data, sob_coinsurance_value1):
         raise ValueError("Could not find stoploss data in the SOB sheet.")
     return threshold, smaller_percentage, larger_percentage
 
-def compare_rbl_with_local_caribbean(local_data, sob_data):
+def compare_rbl_with_local_Caribbean(local_data, sob_data):
     rbl_rows = local_data[local_data['Benefit Type'] == 'RBL ']
     for index, row in rbl_rows.iterrows():
         local_per_service1 = pd.to_numeric(row['Per Service'], errors='coerce')
+        break  # Break the loop after the first match
     return local_per_service1
 
 def compare_rbo_with_overseas(local_data,sob_data):
     rbo_rows = local_data[local_data['Benefit Type'] == 'RBO ']   
     for index, row in rbo_rows.iterrows():
         local_per_service2 = pd.to_numeric(row['Per Service'], errors ='coerce')
+        break  # Break the loop after the first match
     return local_per_service2
 
-def compare_ev_with_local_caribbean(local_data, sob_data):
+def compare_ev_with_local_Caribbean(local_data, sob_data):
     ev_rows = local_data[local_data['Benefit Type'] == "EV  "]
     for index, row in ev_rows.iterrows():
         local_per_service3 =pd.to_numeric(row['Per Service'], errors='coerce')
+        break  # Break the loop after the first match
     return local_per_service3
 
 def compare_nurd_with_local(local_data, sob_data):
     nurd_rows = local_data[local_data['Benefit Type'] == "NURD"]
     for index, row in nurd_rows.iterrows():
         local_per_service4 = pd.to_numeric(row['Per Service'], errors="coerce")   
+        break  # Break the loop after the first match
     return local_per_service4
 
 def compare_nurn_with_local(local_data, sob_data):
@@ -134,13 +138,13 @@ def compare_local_with_sob(local_data, sob_data,user_input):
         raise ValueError(f'Could not find "{sob_familydeductible_text}" in the SOB sheet.')
     sob_familydeductible_value = pd.to_numeric(sob_familydeductible_row.iloc[0, -1], errors='coerce') * sob_deductible_value
 
-    sob_int_rbl_text = r'Local\s*\(Caribbean\)'
+    sob_int_rbl_text = r'Local\s*\(Caribbean|Caricom\)'
     sob_int_rbl_row = sob_data[sob_data.iloc[:, 0].str.contains(sob_int_rbl_text, na=False, case=False)]
     if sob_int_rbl_row.empty:
         raise ValueError(f'Could not find "{sob_int_rbl_text}" in the SOB sheet.')
     sob_int_rbl_value = pd.to_numeric(sob_int_rbl_row.iloc[0, -1], errors='coerce')
 
-    sob_int_rbo_text = r'Overseas\s*\(Non-Caribbean\)'
+    sob_int_rbo_text = r'Overseas\s*\(Non-Caribbean|Non-Caricom\)'
     sob_int_rbo_row = sob_data[sob_data.iloc[:,0].str.contains(sob_int_rbo_text, na=False, case=False)]
     if sob_int_rbo_row.empty:
         raise ValueError(f'Could not find "{sob_int_rbo_text}" in the SOB sheet.')
@@ -151,6 +155,8 @@ def compare_local_with_sob(local_data, sob_data,user_input):
     if sob_int_ev_row.empty:
         raise ValueError(f'Could not find"{sob_int_ev_text}" in the SOB sheet.')
     sob_int_ev_value= pd.to_numeric(sob_int_ev_row.iloc[0,-2], errors ='coerce')
+    if pd.isnull(sob_int_ev_value):
+        sob_int_ev_value = pd.to_numeric(sob_int_ev_row.iloc[0,-1], errors ='coerce')
 
     sob_int_nurd_text = r'Maximum per 8-hour Shift – In private residence\s*\(Day\)'
     sob_int_nurd_row = sob_data[sob_data.iloc[0:,0].str.contains(sob_int_nurd_text, na= False, case= False)]
@@ -175,24 +181,34 @@ def compare_local_with_sob(local_data, sob_data,user_input):
     if sob_int_ov_row.empty:
         raise ValueError(f'Could not find"{sob_int_ov_text}" in the SOB sheet.')
     sob_int_ov_value = pd.to_numeric(sob_int_ov_row.iloc[0,-2], errors='coerce')
+    if pd.isnull(sob_int_ov_value):
+        sob_int_ov_value = pd.to_numeric(sob_int_ov_row.iloc[0,-1], errors='coerce')
+
 
     sob_int_homv_text =  "Home Visit"
     sob_int_homv_row = sob_data[sob_data.iloc[0:,0].str.contains(sob_int_homv_text, na= False, case= False)]
     if sob_int_homv_row.empty:
         raise ValueError(f'Could not find"{sob_int_homv_text}" in the SOB sheet.')
     sob_int_homv_value = pd.to_numeric(sob_int_homv_row.iloc[0,-2], errors='coerce')
+    if pd.isnull(sob_int_homv_value):
+        sob_int_homv_value = pd.to_numeric(sob_int_homv_row.iloc[0,-1], errors='coerce')
+
 
     sob_int_hosv_text =  "Hospital Visit"
     sob_int_hosv_row = sob_data[sob_data.iloc[0:,0].str.contains(sob_int_hosv_text, na= False, case= False)]
     if sob_int_hosv_row.empty:
         raise ValueError(f'Could not find"{sob_int_hosv_text}" in the SOB sheet.')
     sob_int_hosv_value = pd.to_numeric(sob_int_hosv_row.iloc[0,-2], errors='coerce')
+    if pd.isnull(sob_int_hosv_value):
+        sob_int_hosv_value =pd.to_numeric(sob_int_hosv_row.iloc[0,-1], errors ='coerce')
 
     sob_int_sv_text =  "Specialist Visit by Referral Only"
     sob_int_sv_row = sob_data[sob_data.iloc[0:,0].str.contains(sob_int_sv_text, na= False, case= False)]
     if sob_int_sv_row.empty:
         raise ValueError(f'Could not find"{sob_int_sv_text}" in the SOB sheet.')
     sob_int_sv_value = pd.to_numeric(sob_int_sv_row.iloc[0,-2], errors='coerce')
+    if pd.isnull(sob_int_sv_value):
+        sob_int_sv_value = pd.to_numeric(sob_int_sv_row.iloc[0,-1], errors='coerce')
 
     
     coinsurance_pattern = r"On the first \$[0-9,]+ per Calendar Year"
@@ -216,7 +232,7 @@ def compare_local_with_sob(local_data, sob_data,user_input):
             comments = []
 
             if row['Benefit Type'] == 'RBL ':
-                local_per_service1 = compare_rbl_with_local_caribbean(local_data, sob_data)
+                local_per_service1 = compare_rbl_with_local_Caribbean(local_data, sob_data)
                 if local_per_service1 != sob_int_rbl_value:
                     comments.append(f"INTERNAL LIMIT SHOULD BE {sob_int_rbl_value} INSTEAD OF {local_per_service1}")
 
@@ -256,7 +272,7 @@ def compare_local_with_sob(local_data, sob_data,user_input):
                     comments.append(f"LTM SHOULD BE {sob_major_max_value} INSTEAD OF {local_major_max}")
 
             elif row['Benefit Type'] == 'EV  ':
-                local_per_service3 = compare_ev_with_local_caribbean(local_data, sob_data)
+                local_per_service3 = compare_ev_with_local_Caribbean(local_data, sob_data)
                 if local_per_service3 != sob_int_ev_value:
                     comments.append(f"INTERNAL LIMIT SHOULD BE {sob_int_ev_value} INSTEAD OF {local_per_service3}")
 
