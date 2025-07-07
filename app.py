@@ -26,6 +26,7 @@ def upload_file():
     
     file = request.files['file']
     rates_file = request.files.get('rates')  # Get rates file if it exists
+    sob_file = request.files.get('SOB')  
 
     if file.filename == '':
         return 'No selected file'
@@ -36,6 +37,11 @@ def upload_file():
         if rates_file and rates_file.filename != '':
             rates_filepath = os.path.join(app.config['UPLOAD_FOLDER'], rates_file.filename)
             rates_file.save(rates_filepath)
+
+        sob_filepath = None
+        if sob_file and sob_file.filename != '':
+            sob_filepath = os.path.join(app.config['UPLOAD_FOLDER'], sob_file.filename)
+            sob_file.save(sob_filepath)
 
         try:
             local = int(request.form['local'])
@@ -64,6 +70,16 @@ def upload_file():
                 print(f"Columns in rates file: {rates_data.columns.tolist()}")
             except Exception as e:
                 return f'Error processing rates file: {e}'
+        
+        sob_data = None
+        if sob_filepath:
+            try:
+                sob_xl = pd.ExcelFile(sob_filepath)
+                sob_first_sheet_name = sob_xl.sheet_names[0]  # Assuming SOB file has at least one sheet
+                sob_data = pd.read_excel(sob_filepath, sheet_name=sob_first_sheet_name)
+                print(f"Columns in SOB file: {sob_data.columns.tolist()}")
+            except Exception as e:
+                return f'Error processing SOB file: {e}'
 
         # Print out the column names for debugging
         print(f"Columns in sheet '{sheet_name}': {data.columns.tolist()}")
@@ -92,6 +108,8 @@ def upload_file():
                 noncore_data.to_excel(writer, sheet_name='NonCore', index=False)
             if rates_data is not None:
                 rates_data.to_excel(writer, sheet_name=rates_last_sheet_name, index=False)
+            if sob_data is not None:
+                sob_data.to_excel(writer, sheet_name='SOB', index=False)
 
         wb = load_workbook(processed_filepath)
 
@@ -115,6 +133,7 @@ def upload_file():
         <p>Local: {local}</p>
         <p>Core: {core if core is not None else 'N/A'}</p>
         <p>Non-Core: {noncore if noncore is not None else 'N/A'}</p>
+        <p>SOB File: {'Uploaded' if sob_data is not None else 'Not Provided'}</p>
         <p>Processed data saved in <a href="/download">processed_data.xlsx</a></p>
         '''
 
@@ -124,4 +143,4 @@ def download_file():
     return send_file(filepath, as_attachment=True)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True)                                                            
