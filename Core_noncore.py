@@ -135,16 +135,13 @@ def read_comments_and_codes(sheet):
 
     return comments_dict, valid_codes_dict
 
-        
-
-def update_comments(sheet, comments_dict, valid_codes_dict, local_sheet,sob_data):
+def update_comments(sheet, comments_dict, valid_codes_dict, local_sheet, sob_data):
     benefits_type_4_match = ['EV  ', 'HOMV', 'HOSV', 'OV  ', 'SV  ', 'TOV ']
     special_benefit_types = ['ANES', 'ASUR', 'CHRT', 'DXL ', 'EV  ', 'GAMB', 'HAEM', 'HOMV', 'HOSV',
                              'HS  ', 'ICU ', 'MISC', 'OV  ', 'RBO ', 'RX  ', 'SURG', 'SV  ',
                              'TOV ', 'IMRT', 'SURC', 'ICU ']
     sob_internal_limit_row = sob_data[sob_data.iloc[:, 0].astype(str).str.contains("Overseas \(Non-Caribbean|Non-Caricom\)", case=False, na=False)]
     sob_internal_limit = pd.to_numeric(sob_internal_limit_row.iloc[0, -1], errors='coerce')
-    #print(sob_internal_limit)
 
     for row in sheet.iter_rows(min_row=2, max_col=sheet.max_column):
         benefit_type = row[2].value
@@ -181,7 +178,6 @@ def update_comments(sheet, comments_dict, valid_codes_dict, local_sheet,sob_data
             elif benefit_type == 'RBO ':
                 if type_ == 1:
                     m, n, o, t, u, r = row[12].value, row[13].value, row[14].value, row[19].value, row[20].value, row[17].value
-                    #print(r)
                     anes_row = None
                     for s_row in sheet.iter_rows(min_row=2, max_col=sheet.max_column):
                         if s_row[2].value == 'ANES' and s_row[6].value == 1:
@@ -194,7 +190,6 @@ def update_comments(sheet, comments_dict, valid_codes_dict, local_sheet,sob_data
                         else:
                             row[-1].value = "CAL CODE SHOULD BE CHANGED"
                 
-
                 elif type_ == 3:
                     matched = False
                     for local_row in local_sheet.iter_rows(min_row=2, max_col=local_sheet.max_column):
@@ -232,16 +227,13 @@ def update_comments(sheet, comments_dict, valid_codes_dict, local_sheet,sob_data
 
 
 
-def process_data(file_path):
+def process_data(file_path, user_input='yes'):
     unhide_columns(file_path, ['Core', 'NonCore'])
     
     xl = pd.ExcelFile(file_path)
     core_data = pd.read_excel(xl, sheet_name='Core')
     non_core_data = pd.read_excel(xl, sheet_name='NonCore')
     sob_data = pd.read_excel(xl, sheet_name='SOB')
-
-    user_input = input("Is this comparison for Active Employees (under 65)? Enter 'yes' or 'no': ").strip().lower()
-
 
     updated_core_data = compare_sheet_with_sob(core_data, sob_data, 'Core', user_input)
     updated_non_core_data = compare_sheet_with_sob(non_core_data, sob_data, 'NonCore', user_input)
@@ -257,22 +249,18 @@ def process_data(file_path):
 
     comments_dict, valid_codes_dict = read_comments_and_codes(local_sheet)
 
-    #if core_sheet:
-        #update_comments(core_sheet, comments_dict, valid_codes_dict)
-    #if noncore_sheet:
-        #update_comments(noncore_sheet, comments_dict, valid_codes_dict)
     if core_sheet:
-        update_comments(core_sheet, comments_dict, valid_codes_dict, local_sheet,sob_data)
+        update_comments(core_sheet, comments_dict, valid_codes_dict, local_sheet, sob_data)
     if noncore_sheet:
-        update_comments(noncore_sheet, comments_dict, valid_codes_dict, local_sheet,sob_data)
-
+        update_comments(noncore_sheet, comments_dict, valid_codes_dict, local_sheet, sob_data)
 
     wb.save(file_path)
 
 if __name__ == "__main__":
     file_path = 'processed/processed_data.xlsx'
+    user_input = input("Is this comparison for Active Employees (under 65)? Enter 'yes' or 'no': ").strip().lower()
     try:
-        process_data(file_path)
+        process_data(file_path, user_input)
         print(f"Processed data saved to the same file: {file_path}")
     except Exception as e:
         print(f"An error occurred: {e}")

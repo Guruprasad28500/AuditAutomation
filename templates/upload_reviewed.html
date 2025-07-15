@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Upload Reviewed File</title>
+    <style>
+        .upload-form {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .submit-button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h2>Upload Your Reviewed File</h2>
+    
+    <div class="upload-form">
+        <form method="post" enctype="multipart/form-data">
+            <p>Please upload the Excel file after you've made your manual changes:</p>
+            <input type="file" name="reviewed_file" accept=".xlsx">
+            <br><br>
+            <button type="submit" class="submit-button">Upload and Continue</button>
+        </form>
+    </div>
+    
+    <p><a href="{{ url_for('manual_review') }}">Back to instructions</a></p>
+</body>
+</html>

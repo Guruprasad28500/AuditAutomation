@@ -24,11 +24,19 @@ def extract_stoploss_data(sob_data, sob_coinsurance_value1):
     for i, row in sob_data.iterrows():
         threshold_match = re.search(stoploss_threshold_pattern, str(row.iloc[0]))
         if threshold_match:
-            threshold = int(threshold_match.group(1).replace(",", ""))
-        if threshold and smaller_percentage and larger_percentage:
+            threshold_str = threshold_match.group(1).replace(",", "")
+            threshold_val = pd.to_numeric(threshold_str, errors='coerce')
+            if pd.notnull(threshold_val) and not pd.isna(threshold_val):
+                try:
+                    threshold = int(threshold_val)
+                except Exception:
+                    threshold = None
+            else:
+                threshold = None
+        if threshold is not None and smaller_percentage is not None and larger_percentage is not None:
             break
-    if threshold is None or smaller_percentage is None or larger_percentage is None:
-        raise ValueError("Could not find stoploss data in the SOB sheet.")
+    if threshold is None or pd.isna(threshold) or smaller_percentage is None or larger_percentage is None:
+        raise ValueError("Could not find stoploss data in the SOB sheet or value is NaN.")
     return threshold, smaller_percentage, larger_percentage
 
 def compare_rbl_with_local_Caribbean(local_data, sob_data):

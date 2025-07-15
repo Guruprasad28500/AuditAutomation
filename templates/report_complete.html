@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Report Complete</title>
+</head>
+<body>
+    <h2>Report Generation Complete</h2>
+    <p>All processing steps have been completed successfully.</p>
+    <p>You can download the final processed file here:</p>
+    <a href="{{ url_for('download_file') }}" class="download-button">Download Processed File</a>
+    <p><a href="{{ url_for('index') }}">Start Over</a></p>
+</body>
+</html>

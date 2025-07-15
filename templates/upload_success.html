@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Upload Success</title>
+</head>
+<body>
+    <h3>Files Uploaded and Processed Successfully!</h3>
+    <p>Local: {{ local }}</p>
+    <p>Core: {{ core if core is not none else 'N/A' }}</p>
+    <p>Non-Core: {{ noncore if noncore is not none else 'N/A' }}</p>
+    <p>SOB File: {{ 'Uploaded' if sob_uploaded else 'Not Provided' }}</p>
+    <p>Processed data saved in <a href="{{ url_for('download_file') }}">processed_data.xlsx</a></p>
+    
+    <!-- Add button to proceed to next step -->
+    <form action="{{ url_for('audit_local') }}" method="get">
+        <button type="submit">Proceed to Local Audit</button>
+    </form>
+    
+    <a href="{{ url_for('index') }}">Upload another file</a>
+</body>
+</html>

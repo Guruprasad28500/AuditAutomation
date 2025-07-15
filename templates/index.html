@@ -1,132 +1,411 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Upload Excel Files and Enter Values</title>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-<style>
-    body {
-        margin: 0;
-        height: 100vh;
-        font-family: 'Poppins', sans-serif;
-        background: linear-gradient(135deg, #2c3e50, #4ca1af);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        padding: 20px;
-    }
-
-    h2 {
-        color: #fff;
-        margin-bottom: 25px;
-        font-size: 2.2rem;
-        text-align: center;
-        animation: fadeInDown 1s ease-out;
-    }
-
-    form {
-        background: linear-gradient(135deg, #6a11cb, #2575fc);
-        border-radius: 16px;
-        padding: 35px;
-        max-width: 450px;
-        width: 100%;
-        color: #fff;
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
-        animation: fadeInUp 1s ease-in;
-    }
-
-    label {
-        display: block;
-        margin-bottom: 8px;
-        font-weight: 600;
-        font-size: 1rem;
-    }
-
-    input[type="file"],
-    input[type="number"],
-    input[type="submit"] {
-        width: 100%;
-        padding: 12px;
-        border: none;
-        border-radius: 8px;
-        margin-bottom: 20px;
-        font-size: 1rem;
-        transition: all 0.3s ease;
-    }
-
-    input[type="file"] {
-        background: #f1f1f1;
-        color: #333;
-    }
-
-    input[type="file"]:hover {
-        background: #ddd;
-    }
-
-    input[type="number"] {
-        background: #f1f1f1;
-        color: #333;
-    }
-
-    input[type="number"]:focus {
-        outline: none;
-        box-shadow: 0 0 6px rgba(255, 255, 255, 0.6);
-    }
-
-    input[type="submit"] {
-        background: #00c9a7;
-        color: #fff;
-        font-weight: 600;
-        cursor: pointer;
-    }
-
-    input[type="submit"]:hover {
-        background: #00a58a;
-        transform: scale(1.05);
-    }
-
-    @keyframes fadeInDown {
-        from { opacity: 0; transform: translateY(-50px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-
-    @keyframes fadeInUp {
-        from { opacity: 0; transform: translateY(50px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-
-    @media (max-width: 600px) {
-        h2 { font-size: 1.8rem; }
-        form { padding: 25px; }
-    }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audit Automation</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 900px;
+        }
+        
+        .file-upload-container {
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 30px;
+            margin-bottom: 30px;
+            border-left: 5px solid var(--primary-color);
+        }
+        
+        .file-upload-container h3 {
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            position: relative;
+            padding-bottom: 10px;
+        }
+        
+        .file-upload-container h3::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 50px;
+            height: 3px;
+            background: var(--primary-color);
+            border-radius: 2px;
+        }
+        
+        .file-input-group {
+            margin-bottom: 25px;
+            border: 2px dashed #e1e5eb;
+            border-radius: var(--border-radius);
+            padding: 20px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .file-input-group.required {
+            border-left: 4px solid var(--warning-color);
+        }
+        
+        .file-input-group.optional {
+            border-left: 4px solid var(--success-color);
+        }
+        
+        .file-input-group:hover {
+            border-color: var(--primary-color);
+        }
+        
+        .file-input-group.active {
+            border-color: var(--primary-color);
+            background-color: rgba(67, 97, 238, 0.05);
+        }
+        
+        .file-input-label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: var(--dark-color);
+        }
+        
+        .required-badge {
+            display: inline-block;
+            background-color: var(--warning-color);
+            color: white;
+            font-size: 12px;
+            padding: 3px 8px;
+            border-radius: 12px;
+            margin-left: 8px;
+            font-weight: 500;
+        }
+        
+        .optional-badge {
+            display: inline-block;
+            background-color: var(--success-color);
+            color: white;
+            font-size: 12px;
+            padding: 3px 8px;
+            border-radius: 12px;
+            margin-left: 8px;
+            font-weight: 500;
+        }
+        
+        .file-description {
+            margin-bottom: 15px;
+            color: #6c757d;
+            font-size: 14px;
+        }
+        
+        .file-input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        
+        .file-input {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+            z-index: 2;
+        }
+        
+        .file-input-button {
+            padding: 12px 20px;
+            background: var(--gradient-1);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+        
+        .file-input-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(67, 97, 238, 0.3);
+        }
+        
+        .file-name {
+            color: var(--dark-color);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 300px;
+        }
+        
+        .file-status {
+            position: absolute;
+            right: 15px;
+            top: 15px;
+            font-size: 20px;
+        }
+        
+        .subscript-section {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e1e5eb;
+        }
+        
+        .subscript-section h4 {
+            color: var(--secondary-color);
+            margin-bottom: 15px;
+        }
+        
+        .subscript-inputs {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+        
+        .subscript-input-group {
+            margin-bottom: 15px;
+        }
+        
+        .subscript-input-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--dark-color);
+        }
+        
+        .subscript-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e5eb;
+            border-radius: var(--border-radius);
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        
+        .subscript-input:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+        }
+        
+        .submit-button {
+            display: inline-block;
+            padding: 15px 30px;
+            background: var(--gradient-1);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(67, 97, 238, 0.3);
+            width: 100%;
+            margin-top: 20px;
+        }
+        
+        .submit-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(67, 97, 238, 0.4);
+        }
+        
+        .file-info-icon {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            background-color: #e1e5eb;
+            color: #6c757d;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 18px;
+            font-size: 12px;
+            margin-left: 5px;
+            cursor: help;
+            position: relative;
+        }
+        
+        .file-info-tooltip {
+            position: absolute;
+            top: -5px;
+            left: 25px;
+            width: 250px;
+            background-color: #333;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 10;
+            pointer-events: none;
+        }
+        
+        .file-info-icon:hover .file-info-tooltip {
+            opacity: 1;
+            visibility: visible;
+            top: -10px;
+        }
+        
+        .alert {
+            margin-bottom: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .subscript-inputs {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
 <body>
-
-<form action="/upload" method="post" enctype="multipart/form-data">
-    <h2>Upload Excel Files & Enter Values</h2>
+    <div class="container">
+        <h2>Audit Automation</h2>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category if category else 'info' }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        <form action="{{ url_for('upload_file') }}" method="post" enctype="multipart/form-data">
+            <div class="file-upload-container">
+                <h3>Upload Files</h3>
+                
+                <!-- Main File Upload (Required) -->
+                <div class="file-input-group required" id="main-file-group">
+                    <label class="file-input-label">
+                        Current Pricing Detail Excel File
+                        <span class="required-badge">Required</span>
+                        <span class="file-info-icon">?
+                            <span class="file-info-tooltip">
+                                This is the primary Excel file containing the data to be processed. 
+                                Must include sheets with benefit information.
+                            </span>
+                        </span>
+                    </label>
+                    <p class="file-description">Upload the Current Pricing Detail Excel file.</p>
+                    
+                    <div class="file-input-wrapper">
+                        <input type="file" name="file" id="main-file" class="file-input" accept=".xlsx" required>
+                        <div class="file-input-button">Choose File</div>
+                        <div class="file-name" id="main-file-name">No file chosen</div>
+                    </div>
+                    
+                    <div class="file-status" id="main-file-status">❌</div>
+                </div>
+                
+                <!-- Rates File Upload (Optional) -->
+                <div class="file-input-group optional" id="rates-file-group">
+                    <label class="file-input-label">
+                        Rates Excel File
+                        <span class="optional-badge">Optional</span>
+                        <span class="file-info-icon">?
+                            <span class="file-info-tooltip">
+                                This file contains rate information that will be used for calculations.
+                                If not provided, rate-based calculations will be skipped.
+                            </span>
+                        </span>
+                    </label>
+                    <p class="file-description">Upload the rates Excel file (optional).</p>
+                    
+                    <div class="file-input-wrapper">
+                        <input type="file" name="rates" id="rates-file" class="file-input" accept=".xlsx" required>
+                        <div class="file-input-button">Choose File</div>
+                        <div class="file-name" id="rates-file-name">No file chosen</div>
+                    </div>
+                    
+                    <div class="file-status" id="rates-file-status">⚪</div>
+                </div>
+                
+                <!-- SOB File Upload  -->
+                <div class="file-input-group required" id = "sob-file-group">
+                    <label class="file-input-label">
+                        SOB Excel File
+                        <span class="required-badge">Required</span>
+                        <span class="file-info-icon">?
+                            <span class="file-info-tooltip">
+                                This file contains Schedule of Benefits (SOB) information.
+                                If not provided, SOB-based comparisons will be skipped.
+                            </span>
+                        </span>
+                    </label>
+                    <p class="file-description">Upload the Schedule of Benefits (SOB) Excel file .</p>
+                    
+                    <div class="file-input-wrapper">
+                        <input type="file" name="SOB" id="sob-file" class="file-input" accept=".xlsx">
+                        <div class="file-input-button">Choose File</div>
+                        <div class="file-name" id="sob-file-name">No file chosen</div>
+                    </div>
+                    
+                    <div class="file-status" id="sob-file-status">❌</div>
+                </div>
+                
+                <div class="subscript-section">
+                    <h4>Subscript Numbers</h4>
+                    <p class="file-description">Enter the subscript numbers to filter data from the main file.</p>
+                    
+                    <div class="subscript-inputs">
+                        <div class="subscript-input-group">
+                            <label class="subscript-input-label">Local Subscript</label>
+                            <input type="number" name="local" class="subscript-input" required>
+                        </div>
+                        
+                        <div class="subscript-input-group">
+                            <label class="subscript-input-label">Core Subscript</label>
+                            <input type="number" name="core" class="subscript-input" required>
+                        </div>
+                        
+                        <div class="subscript-input-group">
+                            <label class="subscript-input-label">NonCore Subscript</label>
+                            <input type="number" name="noncore" class="subscript-input" required>
+                        </div>
+                    </div>
+                </div>
+                
+                <button type="submit" class="submit-button">Process Files</button>
+            </div>
+        </form>
+    </div>
     
-    <label for="file">Current Pricing Detail file:</label>
-    <input type="file" id="file" name="file" accept=".xlsx, .xls" required>
-
-    <label for="rates">Rates Excel file (optional):</label>
-    <input type="file" id="rates" name="rates" accept=".xlsx, .xls">
-
-    <label for="SOB">SOB Excel file (optional):</label>
-    <input type="file" id="SOB" name="SOB" accept=".xlsx, .xls">
-
-    <label for="local">Local:</label>
-    <input type="number" id="local" name="local" required>
-
-    <label for="core">Core (optional):</label>
-    <input type="number" id="core" name="core">
-
-    <label for="noncore">Non-Core (optional):</label>
-    <input type="number" id="noncore" name="noncore">
-
-    <input type="submit" value="Submit">
-</form>
-
+    <script>
+        // Function to update file input status
+        function updateFileStatus(inputId, groupId, statusId, nameId) {
+            const input = document.getElementById(inputId);
+            const group = document.getElementById(groupId);
+            const status = document.getElementById(statusId);
+            const name = document.getElementById(nameId);
+            
+            input.addEventListener('change', function() {
+                if (this.files.length > 0) {
+                    name.textContent = this.files[0].name;
+                    status.textContent = '✅';
+                    group.classList.add('active');
+                } else {
+                    name.textContent = 'No file chosen';
+                    status.textContent = inputId === 'main-file' ? '❌' : '⚪';
+                    group.classList.remove('active');
+                }
+            });
+        }
+        
+        // Initialize file inputs
+        updateFileStatus('main-file', 'main-file-group', 'main-file-status', 'main-file-name');
+        updateFileStatus('rates-file', 'rates-file-group', 'rates-file-status', 'rates-file-name');
+        updateFileStatus('sob-file', 'sob-file-group', 'sob-file-status', 'sob-file-name');
+    </script>
 </body>
 </html>

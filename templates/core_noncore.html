@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Core/NonCore Audit</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        body {
+            background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            animation: slideIn 0.8s ease-out;
+            max-width: 800px;
+        }
+        
+        .container::before {
+            background: var(--gradient-2);
+        }
+        
+        h2 {
+            color: var(--accent-color);
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        h2::after {
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--accent-color);
+            width: 80px;
+        }
+        
+        .progress-container {
+            margin-bottom: 40px;
+            position: relative;
+            height: 8px;
+            background: #e1e5eb;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .progress-line-fill {
+            width: 50%; /* 3/6 of the way */
+            background: var(--accent-color);
+            height: 100%;
+        }
+        
+        .steps-indicator {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 40px;
+        }
+        
+        .step-point {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 16.66%;
+            position: relative;
+        }
+        
+        .step-dot {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: white;
+            border: 2px solid #e1e5eb;
+            margin-bottom: 8px;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .step-dot.active {
+            background: var(--accent-color);
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 4px rgba(114, 9, 183, 0.2);
+        }
+        
+        .step-dot.completed {
+            background: var(--accent-color);
+            border-color: var(--accent-color);
+        }
+        
+        .step-dot.completed::after,
+        .step-dot.active::after {
+            content: '✓';
+            color: white;
+            font-size: 12px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        
+        .step-label {
+            font-size: 12px;
+            color: #6c757d;
+            text-align: center;
+        }
+        
+        .step-point.active .step-label {
+            color: var(--accent-color);
+            font-weight: 600;
+        }
+        
+        .step-point.completed .step-label {
+            color: var(--accent-color);
+        }
+        
+        .audit-card {
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 30px;
+            margin-bottom: 30px;
+            border-left: 5px solid var(--primary-color);
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        .audit-info {
+            background: rgba(114, 9, 183, 0.05);
+            border-radius: var(--border-radius);
+            padding: 25px;
+            margin-bottom: 30px;
+            border-left: 4px solid var(--accent-color);
+        }
+        
+        .audit-info h3 {
+            color: var(--accent-color);
+            margin-bottom: 15px;
+        }
+        
+        .audit-info p {
+            margin-bottom: 15px;
+        }
+        
+        .audit-info ul {
+            margin-left: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .audit-info li {
+            margin-bottom: 8px;
+            position: relative;
+            padding-left: 20px;
+        }
+        
+        .audit-info li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: var(--accent-color);
+            font-weight: bold;
+        }
+        
+        .btn-primary {
+            display: inline-block;
+            padding: 15px 25px;
+            background: var(--gradient-2);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(114, 9, 183, 0.3);
+            width: 100%;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(114, 9, 183, 0.4);
+        }
+        
+        .icon-container {
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .icon {
+            font-size: 64px;
+            color: var(--accent-color);
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        .form-group.employee-type {
+            background: rgba(114, 9, 183, 0.03);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            border: 1px solid rgba(114, 9, 183, 0.1);
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 500;
+            color: var(--secondary-color);
+        }
+        
+        select {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #e1e5eb;
+            border-radius: var(--border-radius);
+            font-size: 16px;
+            transition: all 0.3s ease;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%236c757d' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 15px center;
+            background-size: 16px;
+        }
+        
+        select:focus {
+            border-color: var(--accent-color);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(114, 9, 183, 0.1);
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Core/NonCore Audit</h2>
+        
+        <div class="progress-container">
+            <div class="progress-line-fill"></div>
+        </div>
+        
+        <div class="steps-indicator">
+            <div class="step-point">
+                <div class="step-dot completed"></div>
+                <div class="step-label">Upload</div>
+            </div>
+            <div class="step-point">
+                <div class="step-dot completed"></div>
+                <div class="step-label">Audit Local</div>
+            </div>
+            <div class="step-point">
+                <div class="step-dot active"></div>
+                <div class="step-label">Core/NonCore</div>
+            </div>
+            <div class="step-point">
+                <div class="step-dot"></div>
+                <div class="step-label">Descriptions</div>
+            </div>
+            <div class="step-point">
+                <div class="step-dot"></div>
+                <div class="step-label">Pass/Fail</div>
+            </div>
+            <div class="step-point">
+                <div class="step-dot"></div>
+                <div class="step-label">Report</div>
+            </div>
+        </div>
+        
+        <div class="icon-container">
+            <div class="icon">🔄</div>
+        </div>
+        
+        <div class="audit-info">
+            <h3>Core/NonCore Comparison</h3>
+            <p>This step will compare Core and NonCore data to identify discrepancies in benefit details.</p>
+            <p>The system will:</p>
+            <ul>
+                <li>Give consolidate Description for all plancodes (Local, Core, NonCore) in seperate sheet</li>
+                <li>Highlight incorrect benefits in red and flag them as "Fail"; mark all others as "Pass." </li>
+                <li>The financial report includes both automatically updated data and cells that require manual input after downloading the final version. </li>
+            </ul>
+        </div>
+        
+        <div class="audit-card">
+            <form action="{{ url_for('core_noncore') }}" method="post">
+                <div class="form-group employee-type">
+                    <label for="employee_type">Is this comparison for Active Employees (under 65)?</label>
+                    <select name="employee_type" id="employee_type">
+                        <option value="yes">Yes</option>
+                        <option value="no">No (Age 65 & over and Retirees)</option>
+                    </select>
+                </div>
+                
+                <button type="submit" class="btn-primary">Run Core/NonCore Comparison</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
+

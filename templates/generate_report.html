@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generate Report</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            animation: fadeInUp 0.8s ease-out;
+            max-width: 800px;
+        }
+        
+        .container::before {
+            background: var(--gradient-1);
+        }
+        
+        h2 {
+            color: var(--primary-color);
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        h2::after {
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--primary-color);
+            width: 80px;
+        }
+        
+        .progress-container {
+            margin-bottom: 40px;
+            position: relative;
+            height: 8px;
+            background: #e1e5eb;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .progress-line-fill {
+            width: 100%; /* 6/6 of the way */
+            background: var(--primary-color);
+        }
+        
+        .steps-indicator {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 40px;
+        }
+        
+        .step-point {
+            display: flex;
+            flex-direction: column;
+            align-items: center
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Generate Report</h2>
+        
+        <div class="step-info">
+            <p>The system is now generating a consolidated report.</p>
+            <p>This process will:</p>
+            <ul>
+                <li>Create a Report sheet with all errors</li>
+                <li>Categorize errors by type</li>
+                <li>Determine financial impact</li>
+                <li>Add data validation for financial impact assessment</li>
+            </ul>
+        </div>
+        
+        <a href="{{ url_for('final_result') }}" class="next-button">View Final Results</a>
+    </div>
+</body>
+</html>

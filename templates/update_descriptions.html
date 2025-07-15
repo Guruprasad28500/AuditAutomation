@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Descriptions</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        body {
+            background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            animation: fadeInUp 0.8s ease-out;
+            max-width: 800px;
+        }
+        
+        .container::before {
+            background: var(--gradient-3);
+        }
+        
+        h2 {
+            color: var(--success-color);
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        h2::after {
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--success-color);
+            width: 80px;
+        }
+        
+        .progress-container {
+            margin-bottom: 40px;
+            position: relative;
+            height: 8px;
+            background: #e1e5eb;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .progress-line-fill {
+            width: 66.6%; /* 4/6 of the way */
+            background: var(--success-color);
+        }
+        
+        .steps-indicator {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 40px;
+        }
+        
+        .step-point {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 16.66%;
+            position: relative;
+        }
+        
+        .step-dot {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: white;
+            border: 2px solid #e1e5eb;
+            margin-bottom: 8px;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .step-dot.active {
+            background: var(--success-color);
+            border-color: var(--success-color);
+            box-shadow: 0 0 0 4px rgba(76, 201, 240, 0.2);
+        }
+        
+        .step-dot.completed {
+            background: var(--success-color);
+            border-color: var(--success-color);
+        }
+        
+        .step-dot.completed::after,
+        .step-dot.active::after {
+            content: '✓';
+            color: white;
+            font-size: 12px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        
+        .step-label {
+            font-size: 12px;
+            color: #6c757d;
+            text-align: center;
+        }
+        
+        .step-point.active .step-label {
+            color: var(--success-color);
+            font-weight: 600;
+        }
+        
+        .step-point.completed .step-label {
+            color: var(--success-color);
+        }
+        
+        .process-card {
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 30px;
+            margin-bottom: 30px;
+            border-left: 5px solid var(--success-color);
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        .step-info {
+            background: rgba(76, 201, 240, 0.05);
+            border-radius: var(--border-radius);
+            padding: 25px;
+            margin-bottom: 30px;
+            border-left: 4px solid var(--success-color);
+        }
+        
+        .step-info h3 {
+            color: var(--success-color);
+            margin-bottom: 15px;
+        }
+        
+        .step-info p {
+            margin-bottom: 15px;
+        }
+        
+        .step-info ul {
+            margin-left: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .step-info li {
+            margin-bottom: 8px;
+            position: relative;
+            padding-left: 20px;
+        }
+        
+        .step-info li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: var(--success-color);
+            font-weight: bold;
+        }
+        
+        .next-button {
+            display: inline-block;
+            padding: 15px 25px;
+            background: var(--gradient-3);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(76, 201, 240, 0.3);
+            width: 100%;
+        }
+        
+        .next-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(76, 201, 240, 0.4);
+        }
+        
+        .icon-container {
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .icon {
+            font-size: 64px;
+            color: var(--success-color);
+            animation: bounce 2s infinite;
+        }
+        
+        .processing-animation {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+        }
+        
+        .dot {
+            width: 15px;
+            height: 15px;
+            background: var(--success-color);
+            border-radius: 50%;
+            margin: 0 8px;
+            animation: wave 1.5s infinite ease-in-out;
+        }
+        
+        .dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        
+        .dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+        
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-20px); }
+            60% { transform: translateY(-10px); }
+        }
+        
+        @keyframes wave {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Update Descriptions</h2>
+        
+        <div class="progress-container">
+            <div class="progress-line-fill"></div>
+        </div>
+        
+        <div class="steps-indicator">
+            <div class="step-point">
+                <div class="step-dot completed"></div>
+                <div class="step-label">Upload</div>
+            </div>
+            <div class="step-point">
+                <div class="step-dot completed"></div>
+                <div class="step-label">Audit Local</div>
+            </div>
+            <div class="step-point">
+                <div class="step-dot completed"></div>
+                <div class="step-label">Core/NonCore</div>
+            </div>
+            <div class="step-point">
+                <div class="step-dot active"></div>
+                <div class="step-label">Descriptions</div>
+            </div>
+            <div class="step-point">
+                <div class="step-dot"></div>
+                <div class="step-label">Pass/Fail</div>
+            </div>
+            <div class="step-point">
+                <div class="step-dot"></div>
+                <div class="step-label">Report</div>
+            </div>
+        </div>
+        
+        <div class="icon-container">
+            <div class="icon">📝</div>
+        </div>
+        
+        <div class="step-info">
+            <h3>Description Standardization</h3>
+            <p>This step will standardize benefit descriptions across all datasets to ensure consistency.</p>
+            <p>The system will:</p>
+            <ul>
+                <li>Normalize text formatting and capitalization</li>
+                <li>Standardize terminology for similar benefits</li>
+                <li>Apply consistent naming conventions</li>
+                <li>Prepare data for final pass/fail analysis</li>
+            </ul>
+        </div>
+        
+        <div class="process-card">
+            <h3>Processing Data</h3>
+            <p>The system is now updating and standardizing all benefit descriptions.</p>
+            
+            <div class="processing-animation">
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+            </div>
+            
+            <p style="text-align: center; color: #6c757d;">This process will take a few moments...</p>
+        </div>
+        
+        <a href="{{ url_for('pass_fail') }}" class="next-button">Continue to Pass/Fail Analysis</a>
+    </div>
+</body>
+</html>
