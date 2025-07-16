@@ -116,14 +116,34 @@ def compare_sv_with_local(local_data, sob_data):
 
 
 
-def compare_local_with_sob(local_data, sob_data,user_input):
-  
-    major_max_text = "For Active Employees under age 65" if user_input == 'yes' else "For Active Employees age 65 & over and Retirees"
-    sob_major_max_row = sob_data[sob_data.iloc[:, 0].str.contains(major_max_text, na=False, case=False)]
+def compare_local_with_sob(local_data, sob_data, user_input):
+    if user_input == 'yes':
+        # Try multiple patterns for active employees under 65/66
+        major_max_patterns = [
+            "For Active Employees under age 66",
+            "For Active Employees under age 65", 
+            "For Active Members under age 65",
+            "For Active Members under age 66"
+        ]
+    else:
+        # Try multiple patterns for retirees/65+
+        major_max_patterns = [
+            "For Active Employees age 65 & over and Retirees",
+            "For Retirees and Active Employees age 65 & over",
+            "For Active Members age 65 & over and Retirees"
+        ]
+    
+    sob_major_max_row = pd.DataFrame()
+    major_max_text = ""
+    for pattern in major_max_patterns:
+        sob_major_max_row = sob_data[sob_data.iloc[:, 0].str.contains(pattern, na=False, case=False)]
+        if not sob_major_max_row.empty:
+            major_max_text = pattern  # Store the found pattern for error messages
+            break
+    
     if sob_major_max_row.empty:
-        raise ValueError(f'Could not find "{major_max_text}" in the SOB sheet.')
+        raise ValueError(f'Could not find any major max pattern in the SOB sheet.')
     sob_major_max_value = pd.to_numeric(sob_major_max_row.iloc[0, -1], errors='coerce')
-    #print(sob_major_max_value)
 
     benefit_types = ['ANES', 'ASUR', 'CHRT', 'DXL ', 'HAEM', 'HS  ','ICU ', 'MISC', 'RX  ', 'SURG', 'GAMB', 'CHIR', 'NUT ', 'OT ', 'OTP ', 'POD ', 'PT  ', 'ST ', 'RBL ','RBO ','EV  ','NURD','NURN','NUHN','OV  ','HOMV','HOSV','SV  ','TOV ']
     benefit_types1 = ['CHIR', 'NUT ', 'OT  ', 'OTP ', 'POD ', 'PT  ', 'ST  ' ]
@@ -227,17 +247,19 @@ def compare_local_with_sob(local_data, sob_data,user_input):
 
     threshold, smaller_percentage, larger_percentage = extract_stoploss_data(sob_data, sob_coinsurance_value1)
 
+    if 'Comments' not in local_data.columns:
+        local_data['Comments'] = ''
+
     for benefit_list, description in [(benefit_types, "general comparison"), (benefit_types1, "physiotherapy")]:
         benefit_rows = local_data[(local_data['Benefit Type'].isin(benefit_list)) & (local_data['Sub-Category'] == 'S') & (local_data['Type'] .isin([1, 2]) )]
 
         for index, row in benefit_rows.iterrows():
+            comments = []
             local_deductible = pd.to_numeric(row['Individual Deductible'], errors='coerce')
             local_family_deductible = pd.to_numeric(row['Family Deductible'], errors='coerce')
             local_medicalCOin = pd.to_numeric(row['Major Medical  % 1'], errors='coerce')
             local_major_max = pd.to_numeric(row['Major/Base Dollar Max'], errors='coerce')
             local_stoploss = pd.to_numeric(row['STOPLOSS'], errors='coerce')
-
-            comments = []
 
             if row['Benefit Type'] == 'RBL ':
                 local_per_service1 = compare_rbl_with_local_Caribbean(local_data, sob_data)
@@ -251,13 +273,10 @@ def compare_local_with_sob(local_data, sob_data,user_input):
                         comments.append(f"FAMILY DEDUCTIBLE SHOULD BE {sob_familydeductible_value} INSTEAD OF {local_family_deductible}")
                 if pd.to_numeric(local_medicalCOin, errors='coerce') != sob_coinsurance_value:
                     comments.append(f"COINSURANCE PERCENTAGE SHOULD BE {sob_coinsurance_value}% INSTEAD OF {local_medicalCOin}%")
-
-                stoploss_expected_value = round((larger_percentage - smaller_percentage) * threshold)
-                if local_stoploss != stoploss_expected_value:
-                    comments.append(f"STOPLOSS SHOULD BE {stoploss_expected_value} INSTEAD OF {local_stoploss}")
-
                 if local_major_max != sob_major_max_value:
                     comments.append(f"LTM SHOULD BE {sob_major_max_value} INSTEAD OF {local_major_max}")
+                if local_stoploss != threshold:
+                    comments.append(f"STOPLOSS SHOULD BE {threshold} INSTEAD OF {local_stoploss}")
 
             elif row['Benefit Type'] == 'RBO ':
                 local_per_service2 = compare_rbo_with_overseas(local_data, sob_data)
@@ -271,13 +290,10 @@ def compare_local_with_sob(local_data, sob_data,user_input):
                         comments.append(f"FAMILY DEDUCTIBLE SHOULD BE {sob_familydeductible_value} INSTEAD OF {local_family_deductible}")
                 if pd.to_numeric(local_medicalCOin, errors='coerce') != sob_coinsurance_value:
                     comments.append(f"COINSURANCE PERCENTAGE SHOULD BE {sob_coinsurance_value}% INSTEAD OF {local_medicalCOin}%")
-
-                stoploss_expected_value = round((larger_percentage - smaller_percentage) * threshold)
-                if local_stoploss != stoploss_expected_value:
-                    comments.append(f"STOPLOSS SHOULD BE {stoploss_expected_value} INSTEAD OF {local_stoploss}")
-
                 if local_major_max != sob_major_max_value:
                     comments.append(f"LTM SHOULD BE {sob_major_max_value} INSTEAD OF {local_major_max}")
+                if local_stoploss != threshold:
+                    comments.append(f"STOPLOSS SHOULD BE {threshold} INSTEAD OF {local_stoploss}")
 
             elif row['Benefit Type'] == 'EV  ':
                 local_per_service3 = compare_ev_with_local_Caribbean(local_data, sob_data)
@@ -291,13 +307,10 @@ def compare_local_with_sob(local_data, sob_data,user_input):
                         comments.append(f"FAMILY DEDUCTIBLE SHOULD BE {sob_familydeductible_value} INSTEAD OF {local_family_deductible}")
                 if pd.to_numeric(local_medicalCOin, errors='coerce') != sob_coinsurance_value:
                     comments.append(f"COINSURANCE PERCENTAGE SHOULD BE {sob_coinsurance_value}% INSTEAD OF {local_medicalCOin}%")
-
-                stoploss_expected_value = round((larger_percentage - smaller_percentage) * threshold)
-                if local_stoploss != stoploss_expected_value:
-                    comments.append(f"STOPLOSS SHOULD BE {stoploss_expected_value} INSTEAD OF {local_stoploss}")
-
                 if local_major_max != sob_major_max_value:
                     comments.append(f"LTM SHOULD BE {sob_major_max_value} INSTEAD OF {local_major_max}")
+                if local_stoploss != threshold:
+                    comments.append(f"STOPLOSS SHOULD BE {threshold} INSTEAD OF {local_stoploss}")
 
             elif row['Benefit Type'] == 'NURD':
                 local_per_service4 = compare_nurd_with_local(local_data, sob_data)
@@ -311,13 +324,10 @@ def compare_local_with_sob(local_data, sob_data,user_input):
                         comments.append(f"FAMILY DEDUCTIBLE SHOULD BE {sob_familydeductible_value} INSTEAD OF {local_family_deductible}")
                 if pd.to_numeric(local_medicalCOin, errors='coerce') != sob_coinsurance_value:
                     comments.append(f"COINSURANCE PERCENTAGE SHOULD BE {sob_coinsurance_value}% INSTEAD OF {local_medicalCOin}%")
-
-                stoploss_expected_value = round((larger_percentage - smaller_percentage) * threshold)
-                if local_stoploss != stoploss_expected_value:
-                    comments.append(f"STOPLOSS SHOULD BE {stoploss_expected_value} INSTEAD OF {local_stoploss}")
-
                 if local_major_max != sob_major_max_value:
                     comments.append(f"LTM SHOULD BE {sob_major_max_value} INSTEAD OF {local_major_max}")
+                if local_stoploss != threshold:
+                    comments.append(f"STOPLOSS SHOULD BE {threshold} INSTEAD OF {local_stoploss}")
 
             elif row['Benefit Type'] == "NURN":
                 local_per_service5 = compare_nurn_with_local(local_data, sob_data)
@@ -331,13 +341,10 @@ def compare_local_with_sob(local_data, sob_data,user_input):
                         comments.append(f"FAMILY DEDUCTIBLE SHOULD BE {sob_familydeductible_value} INSTEAD OF {local_family_deductible}")
                 if pd.to_numeric(local_medicalCOin, errors='coerce') != sob_coinsurance_value:
                     comments.append(f"COINSURANCE PERCENTAGE SHOULD BE {sob_coinsurance_value}% INSTEAD OF {local_medicalCOin}%")
-
-                stoploss_expected_value = round((larger_percentage - smaller_percentage) * threshold)
-                if local_stoploss != stoploss_expected_value:
-                    comments.append(f"STOPLOSS SHOULD BE {stoploss_expected_value} INSTEAD OF {local_stoploss}")
-
                 if local_major_max != sob_major_max_value:
                     comments.append(f"LTM SHOULD BE {sob_major_max_value} INSTEAD OF {local_major_max}")
+                if local_stoploss != threshold:
+                    comments.append(f"STOPLOSS SHOULD BE {threshold} INSTEAD OF {local_stoploss}")
 
             elif row['Benefit Type'] == "NUHN":
                 local_per_service6 = compare_nuhn_with_local(local_data, sob_data)
@@ -351,13 +358,10 @@ def compare_local_with_sob(local_data, sob_data,user_input):
                         comments.append(f"FAMILY DEDUCTIBLE SHOULD BE {sob_familydeductible_value} INSTEAD OF {local_family_deductible}")
                 if pd.to_numeric(local_medicalCOin, errors='coerce') != sob_coinsurance_value:
                     comments.append(f"COINSURANCE PERCENTAGE SHOULD BE {sob_coinsurance_value}% INSTEAD OF {local_medicalCOin}%")
-
-                stoploss_expected_value = round((larger_percentage - smaller_percentage) * threshold)
-                if local_stoploss != stoploss_expected_value:
-                    comments.append(f"STOPLOSS SHOULD BE {stoploss_expected_value} INSTEAD OF {local_stoploss}")
-
                 if local_major_max != sob_major_max_value:
                     comments.append(f"LTM SHOULD BE {sob_major_max_value} INSTEAD OF {local_major_max}")
+                if local_stoploss != threshold:
+                    comments.append(f"STOPLOSS SHOULD BE {threshold} INSTEAD OF {local_stoploss}")
 
             elif row['Benefit Type'] == "OV  ":
                 local_per_service7 = compare_ov_with_local(local_data, sob_data)
@@ -371,13 +375,10 @@ def compare_local_with_sob(local_data, sob_data,user_input):
                         comments.append(f"FAMILY DEDUCTIBLE SHOULD BE {sob_familydeductible_value} INSTEAD OF {local_family_deductible}")
                 if pd.to_numeric(local_medicalCOin, errors='coerce') != sob_coinsurance_value:
                     comments.append(f"COINSURANCE PERCENTAGE SHOULD BE {sob_coinsurance_value}% INSTEAD OF {local_medicalCOin}%")
-
-                stoploss_expected_value = round((larger_percentage - smaller_percentage) * threshold)
-                if local_stoploss != stoploss_expected_value:
-                    comments.append(f"STOPLOSS SHOULD BE {stoploss_expected_value} INSTEAD OF {local_stoploss}")
-
                 if local_major_max != sob_major_max_value:
                     comments.append(f"LTM SHOULD BE {sob_major_max_value} INSTEAD OF {local_major_max}")
+                if local_stoploss != threshold:
+                    comments.append(f"STOPLOSS SHOULD BE {threshold} INSTEAD OF {local_stoploss}")
             
             elif row['Benefit Type'] == "TOV ":
                 local_per_service11 = compare_tov_with_local(local_data, sob_data)
@@ -391,13 +392,10 @@ def compare_local_with_sob(local_data, sob_data,user_input):
                         comments.append(f"FAMILY DEDUCTIBLE SHOULD BE {sob_familydeductible_value} INSTEAD OF {local_family_deductible}")
                 if pd.to_numeric(local_medicalCOin, errors='coerce') != sob_coinsurance_value:
                     comments.append(f"COINSURANCE PERCENTAGE SHOULD BE {sob_coinsurance_value}% INSTEAD OF {local_medicalCOin}%")
-
-                stoploss_expected_value = round((larger_percentage - smaller_percentage) * threshold)
-                if local_stoploss != stoploss_expected_value:
-                    comments.append(f"STOPLOSS SHOULD BE {stoploss_expected_value} INSTEAD OF {local_stoploss}")
-
                 if local_major_max != sob_major_max_value:
                     comments.append(f"LTM SHOULD BE {sob_major_max_value} INSTEAD OF {local_major_max}")
+                if local_stoploss != threshold:
+                    comments.append(f"STOPLOSS SHOULD BE {threshold} INSTEAD OF {local_stoploss}")
             
             elif row['Benefit Type'] == "HOMV":
                 local_per_service8 = compare_homv_with_local(local_data, sob_data)
@@ -411,13 +409,10 @@ def compare_local_with_sob(local_data, sob_data,user_input):
                         comments.append(f"FAMILY DEDUCTIBLE SHOULD BE {sob_familydeductible_value} INSTEAD OF {local_family_deductible}")
                 if pd.to_numeric(local_medicalCOin, errors='coerce') != sob_coinsurance_value:
                     comments.append(f"COINSURANCE PERCENTAGE SHOULD BE {sob_coinsurance_value}% INSTEAD OF {local_medicalCOin}%")
-
-                stoploss_expected_value = round((larger_percentage - smaller_percentage) * threshold)
-                if local_stoploss != stoploss_expected_value:
-                    comments.append(f"STOPLOSS SHOULD BE {stoploss_expected_value} INSTEAD OF {local_stoploss}")
-
                 if local_major_max != sob_major_max_value:
                     comments.append(f"LTM SHOULD BE {sob_major_max_value} INSTEAD OF {local_major_max}")
+                if local_stoploss != threshold:
+                    comments.append(f"STOPLOSS SHOULD BE {threshold} INSTEAD OF {local_stoploss}")
 
             elif row['Benefit Type'] == "HOSV":
                 local_per_service9 = compare_hosv_with_local(local_data, sob_data)
@@ -431,13 +426,10 @@ def compare_local_with_sob(local_data, sob_data,user_input):
                         comments.append(f"FAMILY DEDUCTIBLE SHOULD BE {sob_familydeductible_value} INSTEAD OF {local_family_deductible}")
                 if pd.to_numeric(local_medicalCOin, errors='coerce') != sob_coinsurance_value:
                     comments.append(f"COINSURANCE PERCENTAGE SHOULD BE {sob_coinsurance_value}% INSTEAD OF {local_medicalCOin}%")
-
-                stoploss_expected_value = round((larger_percentage - smaller_percentage) * threshold)
-                if local_stoploss != stoploss_expected_value:
-                    comments.append(f"STOPLOSS SHOULD BE {stoploss_expected_value} INSTEAD OF {local_stoploss}")
-
                 if local_major_max != sob_major_max_value:
                     comments.append(f"LTM SHOULD BE {sob_major_max_value} INSTEAD OF {local_major_max}")
+                if local_stoploss != threshold:
+                    comments.append(f"STOPLOSS SHOULD BE {threshold} INSTEAD OF {local_stoploss}")
 
 
             elif row['Benefit Type'] == "SV  ":
@@ -452,13 +444,10 @@ def compare_local_with_sob(local_data, sob_data,user_input):
                         comments.append(f"FAMILY DEDUCTIBLE SHOULD BE {sob_familydeductible_value} INSTEAD OF {local_family_deductible}")
                 if pd.to_numeric(local_medicalCOin, errors='coerce') != sob_coinsurance_value:
                     comments.append(f"COINSURANCE PERCENTAGE SHOULD BE {sob_coinsurance_value}% INSTEAD OF {local_medicalCOin}%")
-
-                stoploss_expected_value = round((larger_percentage - smaller_percentage) * threshold)
-                if local_stoploss != stoploss_expected_value:
-                    comments.append(f"STOPLOSS SHOULD BE {stoploss_expected_value} INSTEAD OF {local_stoploss}")
-
                 if local_major_max != sob_major_max_value:
                     comments.append(f"LTM SHOULD BE {sob_major_max_value} INSTEAD OF {local_major_max}")
+                if local_stoploss != threshold:
+                    comments.append(f"STOPLOSS SHOULD BE {threshold} INSTEAD OF {local_stoploss}")
 
 
             else:

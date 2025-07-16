@@ -34,6 +34,7 @@ def save_uploaded_file(file, folder: str) -> str:
 def process_excel_file(filepath: str, sheet_index: int = 1) -> pd.DataFrame:
     xl = pd.ExcelFile(filepath)
     sheet_names = xl.sheet_names
+    print(sheet_names)
     logging.info(f"Sheet names in the uploaded file: {sheet_names}")
     if len(sheet_names) <= sheet_index:
         raise ValueError(f"File does not contain a sheet at index {sheet_index}.")
