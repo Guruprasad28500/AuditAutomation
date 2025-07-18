@@ -6,8 +6,9 @@ import logging
 from openpyxl import load_workbook # type: ignore
 
 # Configuration
-UPLOAD_FOLDER = 'uploads'
-PROCESSED_FOLDER = 'processed'
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+UPLOAD_FOLDER = os.path.join(BASE_DIR, '..', 'uploads')
+PROCESSED_FOLDER = os.path.join(BASE_DIR, '..', 'processed')
 ALLOWED_EXTENSIONS = {'xlsx'}
 
 app = Flask(__name__)
@@ -18,7 +19,7 @@ app.config['PROCESSED_FOLDER'] = PROCESSED_FOLDER
 # Setup logging
 logging.basicConfig(level=logging.INFO)
 
-# Ensure upload/processed directories exist
+# Ensure directories exist
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(PROCESSED_FOLDER, exist_ok=True)
 
@@ -34,7 +35,6 @@ def save_uploaded_file(file, folder: str) -> str:
 def process_excel_file(filepath: str, sheet_index: int = 1) -> pd.DataFrame:
     xl = pd.ExcelFile(filepath)
     sheet_names = xl.sheet_names
-    print(sheet_names)
     logging.info(f"Sheet names in the uploaded file: {sheet_names}")
     if len(sheet_names) <= sheet_index:
         raise ValueError(f"File does not contain a sheet at index {sheet_index}.")
@@ -301,5 +301,5 @@ def final_result():
     # This is the final page showing completion of all steps
     return render_template('final_result.html')
 
-if __name__ == '__main__':
-    app.run(debug=True)
+# if __name__ == '__main__':
+#     app.run(debug=True)  # Commented out to allow for deployment
