@@ -1,9 +1,19 @@
-from flask import Flask, request, render_template, send_file, flash, redirect, url_for # type: ignore
-from werkzeug.utils import secure_filename # type: ignore
-import pandas as pd # type: ignore
+from flask import Flask, request, render_template, send_file, flash, redirect, url_for
+from werkzeug.utils import secure_filename
+import pandas as pd
 import os
 import logging
-from openpyxl import load_workbook # type: ignore
+
+# Make sure these imports work
+try:
+    from Audit_local import process_audit_file
+    from update_descriptions import update_descriptions
+    from pass_fail import determine_pass_fail
+    from report import run_report
+except ImportError as e:
+    print(f"Import error: {e}")
+
+from openpyxl import load_workbook
 
 # Configuration
 UPLOAD_FOLDER = 'uploads'
@@ -15,12 +25,12 @@ app.secret_key = 'supersecretkey'  # Required for flashing messages
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['PROCESSED_FOLDER'] = PROCESSED_FOLDER
 
-# Setup logging
-logging.basicConfig(level=logging.INFO)
-
-# Ensure upload/processed directories exist
+# Create directories if they don't exist
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(PROCESSED_FOLDER, exist_ok=True)
+
+# Setup logging
+logging.basicConfig(level=logging.INFO)
 
 def allowed_file(filename: str) -> bool:
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -302,4 +312,5 @@ def final_result():
     return render_template('final_result.html')
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port, debug=False)
