@@ -275,8 +275,9 @@ def compare_local_with_sob(local_data, sob_data, user_input):
                     comments.append(f"COINSURANCE PERCENTAGE SHOULD BE {sob_coinsurance_value}% INSTEAD OF {local_medicalCOin}%")
                 if local_major_max != sob_major_max_value:
                     comments.append(f"LTM SHOULD BE {sob_major_max_value} INSTEAD OF {local_major_max}")
-                if local_stoploss != threshold:
-                    comments.append(f"STOPLOSS SHOULD BE {threshold} INSTEAD OF {local_stoploss}")
+                stoploss_expected_value = round((larger_percentage - smaller_percentage) * threshold)
+                if local_stoploss != stoploss_expected_value:
+                    comments.append(f"STOPLOSS SHOULD BE {stoploss_expected_value} INSTEAD OF {local_stoploss}")
 
             elif row['Benefit Type'] == 'RBO ':
                 local_per_service2 = compare_rbo_with_overseas(local_data, sob_data)
@@ -292,8 +293,9 @@ def compare_local_with_sob(local_data, sob_data, user_input):
                     comments.append(f"COINSURANCE PERCENTAGE SHOULD BE {sob_coinsurance_value}% INSTEAD OF {local_medicalCOin}%")
                 if local_major_max != sob_major_max_value:
                     comments.append(f"LTM SHOULD BE {sob_major_max_value} INSTEAD OF {local_major_max}")
-                if local_stoploss != threshold:
-                    comments.append(f"STOPLOSS SHOULD BE {threshold} INSTEAD OF {local_stoploss}")
+                stoploss_expected_value = round((larger_percentage - smaller_percentage) * threshold)
+                if local_stoploss != stoploss_expected_value:
+                    comments.append(f"STOPLOSS SHOULD BE {stoploss_expected_value} INSTEAD OF {local_stoploss}")
 
             elif row['Benefit Type'] == 'EV  ':
                 local_per_service3 = compare_ev_with_local_Caribbean(local_data, sob_data)
@@ -309,8 +311,9 @@ def compare_local_with_sob(local_data, sob_data, user_input):
                     comments.append(f"COINSURANCE PERCENTAGE SHOULD BE {sob_coinsurance_value}% INSTEAD OF {local_medicalCOin}%")
                 if local_major_max != sob_major_max_value:
                     comments.append(f"LTM SHOULD BE {sob_major_max_value} INSTEAD OF {local_major_max}")
-                if local_stoploss != threshold:
-                    comments.append(f"STOPLOSS SHOULD BE {threshold} INSTEAD OF {local_stoploss}")
+                stoploss_expected_value = round((larger_percentage - smaller_percentage) * threshold)
+                if local_stoploss != stoploss_expected_value:
+                    comments.append(f"STOPLOSS SHOULD BE {stoploss_expected_value} INSTEAD OF {local_stoploss}")
 
             elif row['Benefit Type'] == 'NURD':
                 local_per_service4 = compare_nurd_with_local(local_data, sob_data)
@@ -326,8 +329,9 @@ def compare_local_with_sob(local_data, sob_data, user_input):
                     comments.append(f"COINSURANCE PERCENTAGE SHOULD BE {sob_coinsurance_value}% INSTEAD OF {local_medicalCOin}%")
                 if local_major_max != sob_major_max_value:
                     comments.append(f"LTM SHOULD BE {sob_major_max_value} INSTEAD OF {local_major_max}")
-                if local_stoploss != threshold:
-                    comments.append(f"STOPLOSS SHOULD BE {threshold} INSTEAD OF {local_stoploss}")
+                stoploss_expected_value = round((larger_percentage - smaller_percentage) * threshold)
+                if local_stoploss != stoploss_expected_value:
+                    comments.append(f"STOPLOSS SHOULD BE {stoploss_expected_value} INSTEAD OF {local_stoploss}")
 
             elif row['Benefit Type'] == "NURN":
                 local_per_service5 = compare_nurn_with_local(local_data, sob_data)
@@ -343,9 +347,9 @@ def compare_local_with_sob(local_data, sob_data, user_input):
                     comments.append(f"COINSURANCE PERCENTAGE SHOULD BE {sob_coinsurance_value}% INSTEAD OF {local_medicalCOin}%")
                 if local_major_max != sob_major_max_value:
                     comments.append(f"LTM SHOULD BE {sob_major_max_value} INSTEAD OF {local_major_max}")
-                if local_stoploss != threshold:
-                    comments.append(f"STOPLOSS SHOULD BE {threshold} INSTEAD OF {local_stoploss}")
-
+                stoploss_expected_value = round((larger_percentage - smaller_percentage) * threshold)
+                if local_stoploss != stoploss_expected_value:
+                    comments.append(f"STOPLOSS SHOULD BE {stoploss_expected_value} INSTEAD OF {local_stoploss}")
             elif row['Benefit Type'] == "NUHN":
                 local_per_service6 = compare_nuhn_with_local(local_data, sob_data)
                 if local_per_service6 != sob_int_nuhn_value:
@@ -360,8 +364,9 @@ def compare_local_with_sob(local_data, sob_data, user_input):
                     comments.append(f"COINSURANCE PERCENTAGE SHOULD BE {sob_coinsurance_value}% INSTEAD OF {local_medicalCOin}%")
                 if local_major_max != sob_major_max_value:
                     comments.append(f"LTM SHOULD BE {sob_major_max_value} INSTEAD OF {local_major_max}")
-                if local_stoploss != threshold:
-                    comments.append(f"STOPLOSS SHOULD BE {threshold} INSTEAD OF {local_stoploss}")
+                stoploss_expected_value = round((larger_percentage - smaller_percentage) * threshold)
+                if local_stoploss != stoploss_expected_value:
+                    comments.append(f"STOPLOSS SHOULD BE {stoploss_expected_value} INSTEAD OF {local_stoploss}")
 
             elif row['Benefit Type'] == "OV  ":
                 local_per_service7 = compare_ov_with_local(local_data, sob_data)
@@ -377,8 +382,9 @@ def compare_local_with_sob(local_data, sob_data, user_input):
                     comments.append(f"COINSURANCE PERCENTAGE SHOULD BE {sob_coinsurance_value}% INSTEAD OF {local_medicalCOin}%")
                 if local_major_max != sob_major_max_value:
                     comments.append(f"LTM SHOULD BE {sob_major_max_value} INSTEAD OF {local_major_max}")
-                if local_stoploss != threshold:
-                    comments.append(f"STOPLOSS SHOULD BE {threshold} INSTEAD OF {local_stoploss}")
+                stoploss_expected_value = round((larger_percentage - smaller_percentage) * threshold)
+                if local_stoploss != stoploss_expected_value:
+                    comments.append(f"STOPLOSS SHOULD BE {stoploss_expected_value} INSTEAD OF {local_stoploss}")
             
             elif row['Benefit Type'] == "TOV ":
                 local_per_service11 = compare_tov_with_local(local_data, sob_data)
@@ -394,8 +400,9 @@ def compare_local_with_sob(local_data, sob_data, user_input):
                     comments.append(f"COINSURANCE PERCENTAGE SHOULD BE {sob_coinsurance_value}% INSTEAD OF {local_medicalCOin}%")
                 if local_major_max != sob_major_max_value:
                     comments.append(f"LTM SHOULD BE {sob_major_max_value} INSTEAD OF {local_major_max}")
-                if local_stoploss != threshold:
-                    comments.append(f"STOPLOSS SHOULD BE {threshold} INSTEAD OF {local_stoploss}")
+                stoploss_expected_value = round((larger_percentage - smaller_percentage) * threshold)
+                if local_stoploss != stoploss_expected_value:
+                    comments.append(f"STOPLOSS SHOULD BE {stoploss_expected_value} INSTEAD OF {local_stoploss}")
             
             elif row['Benefit Type'] == "HOMV":
                 local_per_service8 = compare_homv_with_local(local_data, sob_data)
@@ -411,8 +418,9 @@ def compare_local_with_sob(local_data, sob_data, user_input):
                     comments.append(f"COINSURANCE PERCENTAGE SHOULD BE {sob_coinsurance_value}% INSTEAD OF {local_medicalCOin}%")
                 if local_major_max != sob_major_max_value:
                     comments.append(f"LTM SHOULD BE {sob_major_max_value} INSTEAD OF {local_major_max}")
-                if local_stoploss != threshold:
-                    comments.append(f"STOPLOSS SHOULD BE {threshold} INSTEAD OF {local_stoploss}")
+                stoploss_expected_value = round((larger_percentage - smaller_percentage) * threshold)
+                if local_stoploss != stoploss_expected_value:
+                    comments.append(f"STOPLOSS SHOULD BE {stoploss_expected_value} INSTEAD OF {local_stoploss}")
 
             elif row['Benefit Type'] == "HOSV":
                 local_per_service9 = compare_hosv_with_local(local_data, sob_data)
@@ -428,8 +436,9 @@ def compare_local_with_sob(local_data, sob_data, user_input):
                     comments.append(f"COINSURANCE PERCENTAGE SHOULD BE {sob_coinsurance_value}% INSTEAD OF {local_medicalCOin}%")
                 if local_major_max != sob_major_max_value:
                     comments.append(f"LTM SHOULD BE {sob_major_max_value} INSTEAD OF {local_major_max}")
-                if local_stoploss != threshold:
-                    comments.append(f"STOPLOSS SHOULD BE {threshold} INSTEAD OF {local_stoploss}")
+                stoploss_expected_value = round((larger_percentage - smaller_percentage) * threshold)
+                if local_stoploss != stoploss_expected_value:
+                    comments.append(f"STOPLOSS SHOULD BE {stoploss_expected_value} INSTEAD OF {local_stoploss}")
 
 
             elif row['Benefit Type'] == "SV  ":
@@ -446,8 +455,9 @@ def compare_local_with_sob(local_data, sob_data, user_input):
                     comments.append(f"COINSURANCE PERCENTAGE SHOULD BE {sob_coinsurance_value}% INSTEAD OF {local_medicalCOin}%")
                 if local_major_max != sob_major_max_value:
                     comments.append(f"LTM SHOULD BE {sob_major_max_value} INSTEAD OF {local_major_max}")
-                if local_stoploss != threshold:
-                    comments.append(f"STOPLOSS SHOULD BE {threshold} INSTEAD OF {local_stoploss}")
+                stoploss_expected_value = round((larger_percentage - smaller_percentage) * threshold)
+                if local_stoploss != stoploss_expected_value:
+                    comments.append(f"STOPLOSS SHOULD BE {stoploss_expected_value} INSTEAD OF {local_stoploss}")
 
 
             else:
