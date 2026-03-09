@@ -1,19 +1,9 @@
-from flask import Flask, request, render_template, send_file, flash, redirect, url_for
-from werkzeug.utils import secure_filename
-import pandas as pd
+from flask import Flask, request, render_template, send_file, flash, redirect, url_for ,abort# type: ignore
+from werkzeug.utils import secure_filename # type: ignore
+import pandas as pd # type: ignore
 import os
 import logging
-
-# Make sure these imports work
-try:
-    from Audit_local import process_audit_file
-    from update_descriptions import update_descriptions
-    from pass_fail import determine_pass_fail
-    from report import run_report
-except ImportError as e:
-    print(f"Import error: {e}")
-
-from openpyxl import load_workbook
+from openpyxl import load_workbook # type: ignore
 
 # Configuration
 UPLOAD_FOLDER = 'uploads'
@@ -25,12 +15,10 @@ app.secret_key = 'supersecretkey'  # Required for flashing messages
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['PROCESSED_FOLDER'] = PROCESSED_FOLDER
 
-# Create directories if they don't exist
+
+# Ensure upload/processed directories exist
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(PROCESSED_FOLDER, exist_ok=True)
-
-# Setup logging
-logging.basicConfig(level=logging.INFO)
 
 def allowed_file(filename: str) -> bool:
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -136,9 +124,7 @@ def upload_file():
 
     # Parse form data
     form_result = parse_form_integers(request.form)
-    if len(form_result) == 2:  # Error case
-        flash(form_result[1])
-        return redirect(url_for('index'))
+   
     local, core, noncore = form_result
 
     # Process files
@@ -187,6 +173,7 @@ def download_file():
 
 @app.route('/audit_local', methods=['GET', 'POST'])
 def audit_local():
+
     if request.method == 'POST':
         user_input = request.form.get('employee_type', 'yes')
         file_path = os.path.join(app.config['PROCESSED_FOLDER'], 'processed_data.xlsx')
@@ -212,6 +199,8 @@ def audit_local():
         except Exception as e:
             flash(str(e))
             return redirect(url_for('index'))
+    if request.method == 'GET' and request.query_string and request.query_string != b'':
+        abort(400, description="Query parameters not allowed.") 
     
     return render_template('audit_local.html')
 
@@ -312,5 +301,4 @@ def final_result():
     return render_template('final_result.html')
 
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 10000))
-    app.run(host='0.0.0.0', port=port, debug=False)
+    app.run(debug=True)
